@@ -1,0 +1,87 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f7f3ef; /* Warm cream background */
+    color: #4e342e; /* Rich brown text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    min-height: 100vh;
+}
+
+/* Header */
+h1 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #3e2723;
+}
+
+/* Form Container */
+form {
+    background-color: #fff8f0;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+fieldset {
+    border: none;
+}
+
+legend {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    color: #5d4037;
+}
+
+/* Labels and Inputs */
+label {
+    display: block;
+    margin-bottom: 15px;
+    font-weight: 500;
+    color: #6d4c41;
+}
+
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 5px;
+    border: 1px solid #d7ccc8;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #3e2723;
+    font-size: 1rem;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #a1887f;
+    outline: none;
+}
+
+/* Submit Button */
+input[type="submit"] {
+    background-color: #6d4c41;
+    color: #fff8f0;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background-color: #5d4037;
+}
