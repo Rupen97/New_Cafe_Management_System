@@ -1,112 +1,82 @@
-<%--
-  Admin Dashboard Page
-
-  This JSP file displays the admin dashboard with user information and admin-specific functionality.
-  It shows dynamic user information (name, email, ID) and static content for demonstration.
-
-  For session management implementation:
-  - This page should be protected by a filter that checks for admin role
-  - User information should be retrieved from the session
-  - Example: UserModel user = (UserModel) session.getAttribute("user");
-
-  For logout functionality:
-  - Add a logout link that calls a LogoutServlet
-  - The LogoutServlet would invalidate the session and redirect to the login page
-  - Example: session.invalidate();
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.example.demo.models.UserModel" %>
+<%@ page import="java.util.*" %>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard - Advanced Programming and Technologies</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/styles.css">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f6e9da;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #f8f9fa;
+            padding: 20px;
+            position: fixed;
+        }
+        .sidebar a {
+            display: block;
+            margin-bottom: 15px;
+            color: #000;
+            text-decoration: none;
+        }
+        .main {
+            margin-left: 250px;
+            padding: 30px;
+        }
+        .card-box {
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-<header>
-    <h1>Admin Dashboard</h1>
-    <p>Advanced Programming and Technologies - Itahari International College</p>
-</header>
 
-<div class="container clearfix">
-    <div class="sidebar">
-        <h2>Admin Menu</h2>
-        <div class="menu-item"><a href="#">Dashboard</a></div>
-        <div class="menu-item"><a href="#">Manage Users</a></div>
-        <div class="menu-item"><a href="#">Profile Settings</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/index.jsp">Logout</a></div>
-    </div>
+<!-- Sidebar -->
+<div class="sidebar">
+    <h6>Admin Panel</h6>
+    <a href="dashboard.jsp"><i class="bi bi-house-door"></i> Dashboard</a>
+    <a href="menu.jsp"><i class="bi bi-card-list"></i> Menu</a>
+    <a href="orders.jsp"><i class="bi bi-bag-check"></i> Orders</a>
+</div>
 
-    <div class="main-content">
-        <div class="card">
-            <h2>Welcome, <span><%= ((UserModel)request.getAttribute("user")).getName() %></span></h2>
-            <div class="admin-profile">
-                <div class="profile-image">
-                    <img src="data:image/jpeg;base64,${base64Image}" alt="Profile Picture" onerror="this.src='${pageContext.request.contextPath}/assets/images/default-profile.svg'" width="120" height="120">
-                </div>
-                <div class="profile-details">
-                    <p><strong>Email:</strong> <span><%= ((UserModel)session.getAttribute("user")).getEmail() %></span></p>
-                    <p><strong>Role:</strong> Administrator</p>
-                    <p><strong>User ID:</strong> <span><%= ((UserModel)session.getAttribute("user")).getId() %></span></p>
-                    <p><strong>Module Leader:</strong> Binay Koirala | <strong>Module Tutor:</strong> Sujan Subedi</p>
-                </div>
+<!-- Main Content -->
+<div class="main">
+    <h2 class="fw-bold mb-4">Dashboard</h2>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card-box">
+                <h6>Total Orders <i class="bi bi-receipt ms-2"></i></h6>
+                <h4 class="fw-bold mt-2">0 orders</h4>
             </div>
         </div>
-
-        <div class="card">
-            <h2>User Management</h2>
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td>John Doe</td>
-                    <td>john@example.com</td>
-                    <td>user</td>
-                    <td>
-                        <a href="#" class="btn-small">Edit</a>
-                        <a href="#" class="btn-small btn-danger">Delete</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Jane Smith</td>
-                    <td>jane@example.com</td>
-                    <td>user</td>
-                    <td>
-                        <a href="#" class="btn-small">Edit</a>
-                        <a href="#" class="btn-small btn-danger">Delete</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Admin User</td>
-                    <td>admin@example.com</td>
-                    <td>admin</td>
-                    <td>
-                        <a href="#" class="btn-small">Edit</a>
-                        <a href="#" class="btn-small btn-danger">Delete</a>
-                    </td>
-                </tr>
-            </table>
+        <div class="col-md-3">
+            <div class="card-box">
+                <h6>Total Revenue <i class="bi bi-currency-dollar ms-2"></i></h6>
+                <h4 class="fw-bold mt-2">Rs. 0</h4>
+            </div>
         </div>
-
-        <div class="card">
-            <h2>Quick Actions</h2>
-            <a href="#" class="btn">Add New User</a>
-            <a href="#" class="btn">Export User Data</a>
-            <a href="#" class="btn">System Settings</a>
+        <div class="col-md-3">
+            <div class="card-box">
+                <h6>Active Menu <i class="bi bi-cup-hot ms-2"></i></h6>
+                <h4 class="fw-bold mt-2">0 items</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-box">
+                <h6>Total Customers <i class="bi bi-people ms-2"></i></h6>
+                <h4 class="fw-bold mt-2">0</h4>
+            </div>
         </div>
     </div>
 </div>
 
-<footer>
-    <p>&copy; 2025 Itahari International College - Advanced Programming and Technologies</p>
-    <p>Module Leader: Binay Koirala | Module Tutor: Sujan Subedi</p>
-</footer>
 </body>
 </html>
