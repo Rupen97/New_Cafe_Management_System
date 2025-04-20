@@ -15,7 +15,7 @@
   - Example: session.invalidate();
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="models.UserModel" %>
+<%@ page import="com.example.demo.models.UserModel" %>
 <html>
 <head>
     <title>Admin Dashboard - Advanced Programming and Technologies</title>

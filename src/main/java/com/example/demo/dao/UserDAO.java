@@ -16,7 +16,7 @@ public class UserDAO {
     public static final String INSERT_USER = "INSERT INTO users(name, email, password, role, profile_picture) VALUES (?,?,?,?, ?)";
 
     //sql query to find user by email and password
-    public static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email = ? AND password = ?";
+    public static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email = ?";
 
     //selecting user by id
     public static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id = ?";
@@ -52,17 +52,24 @@ public class UserDAO {
 
 
     //method to login
+    @Deprecated
     public static UserModel loginUser(UserModel user) {
+        // This method is kept for backward compatibility
+        // Authentication is now handled by retrieving the user by email and then verifying the password
+        return getUserByEmail(user.getEmail());
+    }
+
+    //method to get user by email
+    public static UserModel getUserByEmail(String email) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_USER_BY_EMAIL);) {
-            // Set parameters for the prepared statement
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getPassword()); // In production, use password hashing
+            // Set the email parameter
+            ps.setString(1, email);
 
             // Execute the query
             ResultSet rs = ps.executeQuery();
 
-            // If a matching user is found, create and return a UserModel object
+            // If the user is found, create and return a UserModel object
             if (rs.next()) {
                 UserModel userFromDB = new UserModel();
                 userFromDB.setId(rs.getInt("id"));
@@ -75,11 +82,12 @@ public class UserDAO {
             }
         } catch (SQLException e) {
             // Log the exception details for debugging
-            System.err.println("Error authenticating user: " + e.getMessage());
+            System.err.println("Error retrieving user by email: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        return null; // Return null if authentication fails
+        return null; // Return null if user not found
     }
+
 
     //method to Getting user by id
     public static UserModel getUserById(int id) {

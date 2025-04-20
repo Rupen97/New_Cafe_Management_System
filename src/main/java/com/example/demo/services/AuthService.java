@@ -2,40 +2,37 @@ package com.example.demo.services;
 
 import com.example.demo.dao.UserDAO;
 import com.example.demo.models.UserModel;
-import com.example.demo.utils.PasswordHashUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * AuthService Class
  *
- * This service class provides authentication and user management functionality.
- * It acts as an intermediary between the controllers and the data access layer,
- * encapsulating the business logic related to user authentication and registration.
+ * Provides authentication, session management, and user operations.
+ * Handles user login, registration, session creation/validation, and logout.
+ * Uses BCrypt for secure password verification.
  */
 public class AuthService {
-
-    // Current authenticated user (in-memory session)
-    private static UserModel currentUser = null;
-    private static long sessionExpiryTime = 0;
 
     /**
      * Register a new user
      *
-     * @param name The user's full name
-     * @param email The user's email address
-     * @param password The user's password
-     * @param role The user's role ("admin" or "user")
-     * @param image The user's profile picture as a byte array
-     * @return The generated user ID if registration is successful, -1 otherwise
+     * Creates a user with the provided information and registers in database.
+     * Password is automatically hashed using BCrypt.
+     *
+     * @param name User's full name
+     * @param email User's email address
+     * @param password Plain text password (will be hashed)
+     * @param role User's role ("admin" or "user")
+     * @param image User's profile picture as byte array
+     * @return Generated user ID if successful, -1 otherwise
      */
-    public static int register(String name, String email, String password, String role, byte[] image) {
-        // Hash the password
-        password = PasswordHashUtil.hashPassword(password);
-
+    public static int register(String name, String email, String password, String role, byte[] image){
         // Create a new UserModel object
         UserModel user = new UserModel();
         user.setName(name);
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(password); // Password will be hashed by UserModel.setPassword
         user.setRole(UserModel.Role.valueOf(role));
         user.setImage(image);
 
@@ -44,113 +41,118 @@ public class AuthService {
     }
 
     /**
-     * Authenticate a user and create a session
+     * Authenticate a user
      *
-     * @param email The user's email address
-     * @param password The user's password
-     * @param rememberMe Whether to extend the session duration
-     * @return The complete UserModel if authentication is successful, null otherwise
+     * Retrieves user by email and verifies password using BCrypt.
+     *
+     * @param email User's email address
+     * @param password User's plain text password
+     * @return Complete UserModel if authenticated, null otherwise
      */
-    public static UserModel login(String email, String password, boolean rememberMe) {
-        // Find user by email
-        UserModel userRequest = new UserModel();
-        userRequest.setEmail(email);
+    public static UserModel login(String email, String password){
+        // Get the user by email
+        UserModel user = UserDAO.getUserByEmail(email);
 
-        UserModel authenticatedUser = UserDAO.loginUser(userRequest);
-
-        if (authenticatedUser == null) {
-            System.out.println("No user found with email: " + email);
-            return null;
+        // If user exists and password matches the hash
+        if (user != null && user.verifyPassword(password)) {
+            return user;
         }
 
-        // Verify password
-        boolean isValidUser = PasswordHashUtil.checkPassword(password, authenticatedUser.getPassword());
-
-        if (!isValidUser) {
-            System.out.println("Invalid password for user: " + email);
-            return null;
-        }
-
-        // Create session
-        createSession(authenticatedUser, rememberMe);
-        return authenticatedUser;
-    }
-
-    /**
-     * Create a new session for the authenticated user
-     *
-     * @param user The authenticated user
-     * @param rememberMe Whether to extend the session duration
-     */
-    private static void createSession(UserModel user, boolean rememberMe) {
-        currentUser = user;
-        // Set session expiry (30 minutes standard, 30 days if rememberMe)
-        sessionExpiryTime = System.currentTimeMillis() +
-                (rememberMe ? 30L * 24 * 60 * 60 * 1000 : 30 * 60 * 1000);
+        // Authentication failed
+        return null;
     }
 
     /**
      * Retrieve a user by ID
      *
-     * @param id The user ID to look up
-     * @return The complete UserModel if found, null otherwise
+     * Gets complete user record from database using ID.
+     * Used after registration to retrieve the newly created user.
+     *
+     * @param id User ID to look up
+     * @return Complete UserModel if found, null otherwise
      */
     public static UserModel getUserById(int id) {
         return UserDAO.getUserById(id);
     }
 
     /**
-     * Validate if a session exists and is not expired
+     * Check if user is authenticated
      *
-     * @return true if session is valid, false otherwise
+     * Verifies if a valid user object exists in the current session.
+     *
+     * @param request HTTP request object
+     * @return true if authenticated, false otherwise
      */
-    public static boolean validateSession() {
-        if (currentUser == null) {
+    public static boolean isAuthenticated(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
             return false;
         }
-        return System.currentTimeMillis() < sessionExpiryTime;
+
+        UserModel user = (UserModel) session.getAttribute("user");
+        return user != null;
     }
 
     /**
-     * Check if the current user is an admin
+     * Check if user has admin role
      *
-     * @return true if user is an admin, false otherwise
+     * Verifies if the authenticated user has admin privileges.
+     *
+     * @param request HTTP request object
+     * @return true if user is admin, false otherwise
      */
-    public static boolean isAdmin() {
-        if (!validateSession()) {
+    public static boolean isAdmin(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
             return false;
         }
-        return currentUser.getRole() == UserModel.Role.admin;
+
+        UserModel user = (UserModel) session.getAttribute("user");
+        return user != null && user.getRole() == UserModel.Role.admin;
     }
 
     /**
-     * Get the current authenticated user
+     * Create user session
      *
-     * @return The current UserModel if session is valid, null otherwise
+     * Creates/uses a session and stores user object with timeout.
+     *
+     * @param request HTTP request object
+     * @param user Authenticated user object
+     * @param timeoutSeconds Session timeout in seconds
      */
-    public static UserModel getCurrentUser() {
-        if (!validateSession()) {
+    public static void createUserSession(HttpServletRequest request, UserModel user, int timeoutSeconds) {
+        HttpSession session = request.getSession();
+        session.setAttribute("user", user);
+        session.setMaxInactiveInterval(timeoutSeconds);
+    }
+
+    /**
+     * Get current user
+     *
+     * Retrieves authenticated user from session.
+     *
+     * @param request HTTP request object
+     * @return User object or null if not authenticated
+     */
+    public static UserModel getCurrentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
             return null;
         }
-        return currentUser;
+        return (UserModel) session.getAttribute("user");
     }
 
     /**
-     * Handle user logout by clearing the current session
-     */
-    public static void logout() {
-        currentUser = null;
-        sessionExpiryTime = 0;
-    }
-
-    /**
-     * Refresh the session expiry time
+     * Logout user
      *
-     * @param rememberMe Whether to extend the session duration
+     * Invalidates the current session.
+     *
+     * @param request HTTP request object
      */
-    public static void refreshSession(boolean rememberMe) {
-        if (validateSession()) {
-            createSession(currentUser, rememberMe);
+    public static void logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
         }
     }
 }

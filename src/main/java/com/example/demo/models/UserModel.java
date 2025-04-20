@@ -1,5 +1,7 @@
 package com.example.demo.models;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.io.Serializable;
 
 public class UserModel implements Serializable {
@@ -45,7 +47,14 @@ public class UserModel implements Serializable {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        // Check if the password is already hashed (starts with $2a$)
+        if (password != null && !password.startsWith("$2a$")) {
+            // Hash the password with BCrypt
+            this.password = BCrypt.hashpw(password, BCrypt.gensalt(12));
+        } else {
+            // Password is already hashed or null
+            this.password = password;
+        }
     }
 
     public Role getRole() {
@@ -63,4 +72,12 @@ public class UserModel implements Serializable {
     public void setImage(byte[] image) {
         this.image = image;
     }
+
+    public boolean verifyPassword(String plainTextPassword) {
+        if (this.password == null || plainTextPassword == null) {
+            return false;
+        }
+        return BCrypt.checkpw(plainTextPassword, this.password);
+    }
+
 }

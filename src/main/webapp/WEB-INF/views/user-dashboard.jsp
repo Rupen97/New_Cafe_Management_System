@@ -15,7 +15,7 @@
   - Example: session.invalidate();
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.example.aptutorialworkshop.models.UserModel" %>
+<%@ page import="com.example.demo.models.UserModel" %>
 <html>
 <head>
     <title>Student Dashboard - Advanced Programming and Technologies</title>
