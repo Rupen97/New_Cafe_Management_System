@@ -186,8 +186,7 @@
 </div>
 
 <footer>
-    <p>&copy; 2025 Itahari International College - Advanced Programming and Technologies</p>
-    <p>Module Leader: Binay Koirala | Module Tutor: Sujan Subedi</p>
+    <p>&copy; 2025 Beans & Bloom - Cafe Management System</p>
 </footer>
 
 <script>
