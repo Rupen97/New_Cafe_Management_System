@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,6 +97,7 @@
             right: 15px;
             transform: translateY(-50%);
             cursor: pointer;
+            cursor: pointer;
             color: #a77c52;
         }
 
@@ -181,56 +183,82 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <div class="brand-name">Bean & <span>Bloom</span></div>
-            <h1>Welcome Back</h1>
-            <p>Log in to your Bean & Bloom account</p>
-        </div>
-
-        <form method="post" action="#">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" class="input-field" name="email" placeholder="you@example.com" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="input-wrapper">
-                    <input type="password" id="password" class="input-field" name="password" placeholder="Enter your password" required>
-                    <i id="togglePassword" class="fas fa-eye toggle-password"></i>
-                </div>
-            </div>
-
-            <input type="submit" class="login-btn" value="Login">
-        </form>
-
-        <div class="register-link">
-            Don't have an account? <a href="${pageContext.request.contextPath}/RegisterServlet">Register here</a>
-        </div>
-
-        <div class="benefits">
-            <p>Where Coffee Meets Calm.</p>
-            <p>Experience the comfort of your favorite cafe:</p>
-            <ul>
-                <li>Artisan coffee blends</li>
-                <li>Freshly baked pastries</li>
-                <li>Cozy atmosphere</li>
-                <li>Community events</li>
-            </ul>
-        </div>
+<div class="login-container">
+    <div class="login-header">
+        <div class="brand-name">Bean & <span>Bloom</span></div>
+        <h1>Welcome Back</h1>
+        <p>Log in to your Bean & Bloom account</p>
     </div>
 
-    <script>
-        const togglePassword = document.getElementById("togglePassword");
-        const passwordInput = document.getElementById("password");
+    <!-- Show messages -->
+    <c:if test="${not empty successMessage}">
+        <div class="message success">${successMessage}</div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div class="message error">${errorMessage}</div>
+    </c:if>
 
-        togglePassword.addEventListener("click", function () {
-            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-            passwordInput.setAttribute("type", type);
-            this.classList.toggle("fa-eye");
-            this.classList.toggle("fa-eye-slash");
-        });
-    </script>
+    <form method="post" action="LoginServlet">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input
+                    type="email"
+                    id="email"
+                    class="input-field"
+                    name="email"
+                    placeholder="you@example.com"
+                    value="${savedEmail != null ? savedEmail : ''}"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-wrapper">
+                <input
+                        type="password"
+                        id="password"
+                        class="input-field"
+                        name="password"
+                        placeholder="Enter your password"
+                        required>
+                <i id="togglePassword" class="fas fa-eye toggle-password"></i>
+            </div>
+        </div>
+
+        <div class="remember-me">
+            <input type="checkbox" name="remember" id="remember">
+            <label for="remember">Remember Me</label>
+        </div>
+
+        <input type="submit" class="login-btn" value="Login">
+    </form>
+
+    <div class="register-link">
+        Don't have an account? <a href="${pageContext.request.contextPath}/RegisterServlet">Register here</a>
+    </div>
+
+    <div class="benefits">
+        <p>Where Coffee Meets Calm.</p>
+        <p>Experience the comfort of your favorite cafe:</p>
+        <ul>
+            <li>Artisan coffee blends</li>
+            <li>Freshly baked pastries</li>
+            <li>Cozy atmosphere</li>
+            <li>Community events</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+
+    togglePassword.addEventListener("click", function () {
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+    });
+</script>
 </body>
 </html>
