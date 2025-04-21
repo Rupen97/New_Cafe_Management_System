@@ -2,12 +2,15 @@ package com.example.demo.controller;
 
 import com.example.demo.models.UserModel;
 import com.example.demo.services.AuthService;
+import com.example.demo.dao.UserDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AdminDashboardServlet
@@ -42,6 +45,10 @@ public class AdminDashBoardServlet extends HttpServlet {
 
             // User is authenticated and is an admin
             request.setAttribute("user", user);
+
+            // Get all users and add them to the request
+            List<UserModel> allUsers = UserDAO.getAllUsers();
+            request.setAttribute("allUsers", allUsers);
 
             // Convert image bytes to Base64 for display in JSP
             if (user.getImage() != null && user.getImage().length > 0) {

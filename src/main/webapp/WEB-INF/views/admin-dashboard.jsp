@@ -16,24 +16,38 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.example.demo.models.UserModel" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Base64" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <html>
 <head>
     <title>Admin Dashboard - Advanced Programming and Technologies</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/styles.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin-dashboard.css">
 </head>
 <body>
+<c:if test="${not empty param.success}">
+    <div class="alert alert-success">
+        <p>${param.success}</p>
+    </div>
+</c:if>
+<c:if test="${not empty param.error}">
+    <div class="alert alert-error">
+        <p>${param.error}</p>
+    </div>
+</c:if>
 <header>
     <h1>Admin Dashboard</h1>
-    <p>Advanced Programming and Technologies - Itahari International College</p>
+    <p>Brew and Beans - Cafe Management System</p>
 </header>
 
 <div class="container clearfix">
     <div class="sidebar">
         <h2>Admin Menu</h2>
-        <div class="menu-item"><a href="#">Dashboard</a></div>
-        <div class="menu-item"><a href="#">Manage Users</a></div>
-        <div class="menu-item"><a href="#">Profile Settings</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/index.jsp">Logout</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard.jsp">Dashboard</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/admin/users.jsp">Manage Users</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/admin/profile.jsp">Manage Items</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></div>
     </div>
 
     <div class="main-content">
@@ -47,7 +61,6 @@
                     <p><strong>Email:</strong> <span><%= ((UserModel)session.getAttribute("user")).getEmail() %></span></p>
                     <p><strong>Role:</strong> Administrator</p>
                     <p><strong>User ID:</strong> <span><%= ((UserModel)session.getAttribute("user")).getId() %></span></p>
-                    <p><strong>Module Leader:</strong> Binay Koirala | <strong>Module Tutor:</strong> Sujan Subedi</p>
                 </div>
             </div>
         </div>
@@ -62,51 +75,33 @@
                     <th>Role</th>
                     <th>Actions</th>
                 </tr>
-                <tr>
-                    <td>1</td>
-                    <td>John Doe</td>
-                    <td>john@example.com</td>
-                    <td>user</td>
-                    <td>
-                        <a href="#" class="btn-small">Edit</a>
-                        <a href="#" class="btn-small btn-danger">Delete</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Jane Smith</td>
-                    <td>jane@example.com</td>
-                    <td>user</td>
-                    <td>
-                        <a href="#" class="btn-small">Edit</a>
-                        <a href="#" class="btn-small btn-danger">Delete</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Admin User</td>
-                    <td>admin@example.com</td>
-                    <td>admin</td>
-                    <td>
-                        <a href="#" class="btn-small">Edit</a>
-                        <a href="#" class="btn-small btn-danger">Delete</a>
-                    </td>
-                </tr>
+                <c:forEach var="user" items="${allUsers}">
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/UpdateUserServlet?id=${user.id}" class="btn-small">Edit</a>
+                            <form action="${pageContext.request.contextPath}/DeleteUserServlet" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="${user.id}">
+                                <button type="submit" class="btn-small btn-danger"
+                                        onclick="return confirm('Are you sure you want to delete this user?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </c:forEach>
             </table>
         </div>
 
-        <div class="card">
-            <h2>Quick Actions</h2>
-            <a href="#" class="btn">Add New User</a>
-            <a href="#" class="btn">Export User Data</a>
-            <a href="#" class="btn">System Settings</a>
-        </div>
+
     </div>
 </div>
 
 <footer>
-    <p>&copy; 2025 Itahari International College - Advanced Programming and Technologies</p>
-    <p>Module Leader: Binay Koirala | Module Tutor: Sujan Subedi</p>
+    <p>&copy; 2025 Bean and Bloom - Cafe Management System</p>
 </footer>
 </body>
 </html>

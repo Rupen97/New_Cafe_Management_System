@@ -5,58 +5,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Café Manager</title>
-    <link rel="stylesheet" href="./assets/css/index.css">
+    <title>Bean & Bloom</title>
+    <link rel="stylesheet" href="./assets/css/index.css"> <%-- Adjust path as needed --%>
 </head>
 <body>
+<header>
+    <h1>Bean & Bloom</h1>
+</header>
+
 <div class="container">
-    <header>
-        <div class="logo">
-            <h1>Café Manager</h1>
-            <div class="coffee-cup">
-                <div class="steam"></div>
+    <div class="role-selection">
+        <div class="side-image-left"></div>
+        <div class="side-image-right"></div>
+        <h2>Welcome to Bean & Bloom</h2>
+        <p>Please select your option to continue</p>
+
+        <div class="role-cards">
+            <div class="role-card" id="customer-card">
+                <div class="role-icon">☕</div>
+                <h3>Welcome Back</h3>
+                <p>Access your account to place orders and view your favorites</p>
+                <a href="./LoginServlet?role=customer" class="role-btn">Sign In</a>
+            </div>
+
+            <div class="role-card" id="register-card">
+                <div class="role-icon">📝</div>
+                <h3>New User?</h3>
+                <p>Create a new account to start ordering from Bean & Bloom</p>
+                <a href="./RegisterServlet" class="role-btn">Register Now</a>
             </div>
         </div>
-        <nav>
-            <a href="./LoginServlet" class="btn">Login</a>
-            <a href="./RegisterServlet" class="btn">Register</a>
-        </nav>
-    </header>
-
-    <section class="hero">
-        <h2>Manage Your Café With Ease</h2>
-        <p>A simple solution for your café management needs</p>
-    </section>
-
-    <section class="features">
-        <h2>Features</h2>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Inventory Management</h3>
-                <p>Track coffee beans, milk, and other supplies</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">💰</div>
-                <h3>Sales Tracking</h3>
-                <p>Monitor daily, weekly, and monthly sales</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">👥</div>
-                <h3>Staff Scheduling</h3>
-                <p>Manage barista shifts and schedules</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🧾</div>
-                <h3>Order Processing</h3>
-                <p>Take and fulfill customer orders efficiently</p>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <p>© 2025 Café Manager. All rights reserved.</p>
-    </footer>
+    </div>
 </div>
+
+<footer>
+    <p>&copy; 2025 Bean & Bloom</p>
+</footer>
+
+<script>
+    document.getElementById('customer-card').addEventListener('click', function(e) {
+        if (!e.target.classList.contains('role-btn')) {
+            window.location.href = './LoginServlet?role=customer';
+        }
+    });
+
+    document.getElementById('register-card').addEventListener('click', function(e) {
+        if (!e.target.classList.contains('role-btn')) {
+            window.location.href = './RegisterServlet';
+        }
+    });
+</script>
 </body>
 </html>

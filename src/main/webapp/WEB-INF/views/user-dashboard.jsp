@@ -1,93 +1,152 @@
-<%--
-  User Dashboard Page
-
-  This JSP file displays the user dashboard with user information and user-specific functionality.
-  It shows dynamic user information (name, email, ID) and static content for demonstration.
-
-  For session management implementation:
-  - This page should be protected by a filter that checks for authentication
-  - User information should be retrieved from the session
-  - Example: UserModel user = (UserModel) session.getAttribute("user");
-
-  For logout functionality:
-  - Add a logout link that calls a LogoutServlet
-  - The LogoutServlet would invalidate the session and redirect to the login page
-  - Example: session.invalidate();
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.example.demo.models.UserModel" %>
+<%
+    UserModel user = (UserModel) request.getAttribute("user");
+    String base64Image = (String) request.getAttribute("base64Image");
+%>
 <html>
 <head>
-    <title>Student Dashboard - Advanced Programming and Technologies</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/styles.css">
+    <title>Customer Dashboard - Advanced Programming and Technologies</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/edit-user.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5; /* Updated primary color */
+            --secondary-color: #6b7280;
+            --light-gray: #f9fafb;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        .sidebar {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color); /* Updated to use primary color */
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .menu-item {
+            margin-bottom: 1rem;
+        }
+
+        .menu-item a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .menu-item a:hover {
+            color: var(--primary-color); /* Updated hover color */
+            text-decoration: underline;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .profile-image img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eee;
+        }
+
+        .profile-details p {
+            margin: 0.5rem 0;
+            color: #555;
+        }
+
+        .btn-small {
+            display: inline-block;
+            background: var(--primary-color); /* Updated button color */
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            background: #4338ca; /* Darker shade for hover */
+            transform: translateY(-1px);
+        }
+
+        header h1 {
+            color: var(--primary-color); /* Updated header color */
+        }
+    </style>
 </head>
 <body>
 <header>
-    <h1>Student Dashboard</h1>
-    <p>Advanced Programming and Technologies - Itahari International College</p>
+    <h1>Customer Dashboard</h1>
+    <p>Brew & Beans</p>
 </header>
 
 <div class="container clearfix">
+    <!-- Sidebar -->
     <div class="sidebar">
-        <h2>Student Menu</h2>
-        <div class="menu-item"><a href="#">Dashboard</a></div>
-        <div class="menu-item"><a href="#">My Courses</a></div>
-        <div class="menu-item"><a href="#">Profile Settings</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/index.jsp">Logout</a></div>
+        <h2>Customer Menu</h2>
+        <div class="menu-item"><a href="UserDashboardServlet">Dashboard</a></div>
+        <div class="menu-item"><a href="#">My Items</a></div>
+        <div class="menu-item"><a href="#">Order History</a></div>
+        <div class="menu-item"><a href="EditProfileServlet">Profile Settings</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></div>
     </div>
 
+    <!-- Main Content -->
     <div class="main-content">
+        <% if (request.getAttribute("successMessage") != null) { %>
+        <div class="alert alert-success"><%= request.getAttribute("successMessage") %></div>
+        <% } %>
+        <% if (request.getAttribute("errorMessage") != null) { %>
+        <div class="alert alert-error"><%= request.getAttribute("errorMessage") %></div>
+        <% } %>
+
+        <!-- Welcome Card -->
         <div class="card">
-            <h2>Welcome, <span><%= ((UserModel)request.getAttribute("user")).getName() %></span></h2>
+            <h2>Welcome, <%= user.getName() %></h2>
             <div class="user-profile">
                 <div class="profile-image">
-                    <img src="data:image/jpeg;base64,${base64Image}" alt="Profile Picture" onerror="this.src='${pageContext.request.contextPath}/assets/images/default-profile.svg'" width="120" height="120">
+                    <img src="data:image/jpeg;base64,<%= base64Image != null ? base64Image : "" %>"
+                         alt="Profile Picture"
+                         onerror="this.src='${pageContext.request.contextPath}/assets/images/default-profile.svg'">
                 </div>
                 <div class="profile-details">
-                    <p><strong>Email:</strong> <span><%= ((UserModel)request.getAttribute("user")).getEmail() %></span></p>
+                    <p><strong>Email:</strong> <%= user.getEmail() %></p>
                     <p><strong>Role:</strong> Student</p>
-                    <p><strong>User ID:</strong> <span><%= ((UserModel)request.getAttribute("user")).getId() %></span></p>
-                    <p><strong>Module Leader:</strong> Binay Koirala | <strong>Module Tutor:</strong> Sujan Subedi</p>
+                    <p><strong>User ID:</strong> <%= user.getId() %></p>
                 </div>
             </div>
         </div>
 
+        <!-- Account Actions -->
         <div class="card">
-            <h2>My Courses</h2>
-
-            <div class="course-card">
-                <h3>Advanced Programming and Technologies</h3>
-                <p>Instructor: Binay Koirala</p>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 75%;">75%</div>
-                </div>
-                <a href="#" class="btn">View Course</a>
-            </div>
-
-            <div class="course-card">
-                <h3>Database Management Systems</h3>
-                <p>Instructor: Sujan Subedi</p>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: 60%;">60%</div>
-                </div>
-                <a href="#" class="btn">View Course</a>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Account Information</h2>
-            <div class="account-actions">
-                <a href="#" class="btn">Edit Profile</a>
-                <a href="#" class="btn">Change Password</a>
-                <a href="#" class="btn">Update Profile Picture</a>
-            </div>
+            <h2>Account Actions</h2>
+            <a href="EditProfileServlet" class="btn-small">Edit Profile</a>
         </div>
     </div>
 </div>
 
 <footer>
-    <p>&copy; 2025 Itahari International College - Advanced Programming and Technologies</p>
-    <p>Module Leader: Binay Koirala | Module Tutor: Sujan Subedi</p>
+    <p>&copy; 2025 Bean & Bloom - Cafe Management System</p>
 </footer>
 </body>
 </html>
