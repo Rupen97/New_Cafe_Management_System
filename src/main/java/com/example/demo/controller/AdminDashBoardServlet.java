@@ -63,7 +63,6 @@ public class AdminDashBoardServlet extends HttpServlet {
             response.sendRedirect("LoginServlet");
         }
     }
-
     /**
      * Handles POST requests to the AdminDashboardServlet
      *

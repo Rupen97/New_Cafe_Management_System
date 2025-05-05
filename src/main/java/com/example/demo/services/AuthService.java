@@ -111,6 +111,27 @@ public class AuthService {
         return user != null && user.getRole() == UserModel.Role.admin;
     }
 
+
+    public static boolean isUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+
+        UserModel user = (UserModel) session.getAttribute("user");
+        return user != null && user.getRole() == UserModel.Role.user;
+    }
+
+    public static int getUserId(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return -1;
+        }
+
+        UserModel user = (UserModel) session.getAttribute("user");
+        return (user != null) ? user.getId() : -1;
+    }
+
     /**
      * Create user session
      *
@@ -155,4 +176,10 @@ public class AuthService {
             session.invalidate();
         }
     }
+
+    public static boolean isLoggedIn(HttpServletRequest request) {
+        return request.getSession().getAttribute("user") != null;
+    }
+
+
 }

@@ -29,10 +29,11 @@
 <div class="container clearfix">
     <div class="sidebar">
         <h2>Admin Menu</h2>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard.jsp">Dashboard</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/admin/users.jsp">Manage Users</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/admin-dashboard.jsp">Dashboard</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/ListItemsServlet">Manage Users</a></div>
         <div class="menu-item"><a href="${pageContext.request.contextPath}/admin/profile.jsp">Profile Settings</a></div>
         <div class="menu-item"><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/view-order">manage order</a></div>
     </div>
 
     <div class="main-content">

@@ -33,6 +33,6 @@ public class DashboardServlet extends HttpServlet {
         request.setAttribute("user", user);
 
         // Forward to dashboard JSP
-        request.getRequestDispatcher("/WEB-INF/views/dashboard.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/list-items.jsp").forward(request, response);
     }
 }

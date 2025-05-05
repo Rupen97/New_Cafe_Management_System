@@ -82,9 +82,6 @@ public class UpdateUserServlet extends HttpServlet {
                 userToUpdate.setEmail(email);
                 userToUpdate.setRole(UserModel.Role.valueOf(role));
 
-                // TODO: Add logic to update password if needed
-                // TODO: Add logic to update profile picture if needed
-
                 // Update user in database
                 boolean changingPassword = false;
                 boolean success = UserDAO.updateProfile(userToUpdate, changingPassword);
