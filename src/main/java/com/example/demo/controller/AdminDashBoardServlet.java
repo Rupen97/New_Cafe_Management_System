@@ -25,66 +25,56 @@ import java.util.List;
  */
 @WebServlet(name = "AdminDashboardServlet", value = "/AdminDashboardServlet")
 public class AdminDashBoardServlet extends HttpServlet {
+
     /**
      * Handles GET requests to the AdminDashboardServlet
      *
      * This method checks if the user is authenticated and has admin role.
      * If so, it displays the admin dashboard. Otherwise, it redirects to the login page.
-     *
-     * @param request The HTTP request object
-     * @param response The HTTP response object
-     * @throws ServletException If a servlet-specific error occurs
-     * @throws IOException If an I/O error occurs
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Check if the user is authenticated and is an admin
+        // Step 1: Validate authentication and admin role
         if (AuthService.isAuthenticated(request) && AuthService.isAdmin(request)) {
-            // Get the user from the session
+            // Step 2: Fetch current user from session
             UserModel user = AuthService.getCurrentUser(request);
 
-            // User is authenticated and is an admin
+            // Step 3: Attach user to request for use in JSP
             request.setAttribute("user", user);
 
-            // Get all users and add them to the request
+            // Step 4: Retrieve all users for admin management panel
             List<UserModel> allUsers = UserDAO.getAllUsers();
             request.setAttribute("allUsers", allUsers);
 
-            // Convert image bytes to Base64 for display in JSP
+            // Step 5: Convert user image to Base64 if available (for HTML <img> display)
             if (user.getImage() != null && user.getImage().length > 0) {
                 String base64Image = Base64.getEncoder().encodeToString(user.getImage());
                 request.setAttribute("base64Image", base64Image);
             }
 
-            // Forward to dashboard
+            // Step 6: Forward request to admin dashboard JSP
             request.getRequestDispatcher("/WEB-INF/views/admin-dashboard.jsp").forward(request, response);
         } else {
-            // If not authenticated or not an admin, redirect to login
+            // Redirect to login page if not authorized
             response.sendRedirect("LoginServlet");
         }
     }
+
     /**
      * Handles POST requests to the AdminDashboardServlet
      *
      * This method verifies that the user is authenticated and has admin role,
      * then processes any admin-specific form submissions or actions.
-     *
-     * @param request The HTTP request object
-     * @param response The HTTP response object
-     * @throws ServletException If a servlet-specific error occurs
-     * @throws IOException If an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Check if the user is authenticated and is an admin
+        // Same access check as in doGet
         if (!AuthService.isAuthenticated(request) || !AuthService.isAdmin(request)) {
-            // If not authenticated or not an admin, redirect to login
             response.sendRedirect("LoginServlet");
             return;
         }
 
-        // Process any admin-specific form submissions here
-        // For now, just display the dashboard
+        // No specific POST actions yet — fallback to showing dashboard
         doGet(request, response);
     }
 }

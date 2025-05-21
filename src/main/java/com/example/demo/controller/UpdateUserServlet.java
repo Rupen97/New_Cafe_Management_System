@@ -10,24 +10,34 @@ import jakarta.servlet.annotation.*;
 import java.io.IOException;
 import java.util.Base64;
 
+/**
+ * UpdateUserServlet
+ *
+ * Handles displaying and updating user details by admin.
+ * Supports image upload and form submission.
+ */
 @WebServlet(name = "UpdateUserServlet", value = "/UpdateUserServlet")
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024,
-        maxFileSize = 1024 * 1024 * 5,
-        maxRequestSize = 1024 * 1024 * 10
+        fileSizeThreshold = 1024 * 1024,       // 1MB before writing to disk
+        maxFileSize = 1024 * 1024 * 5,         // Max image file size 5MB
+        maxRequestSize = 1024 * 1024 * 10      // Max request size 10MB
 )
-
 public class UpdateUserServlet extends HttpServlet {
+
+    /**
+     * Shows the edit user form to admin.
+     * Loads user data by ID and converts image to Base64 string if available.
+     * Redirects if user not found or unauthorized access.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        // Check if admin is authenticated
+        // Check admin authentication and authorization
         if (!AuthService.isAuthenticated(request) || !AuthService.isAdmin(request)) {
             response.sendRedirect("LoginServlet");
             return;
         }
 
-        // Get user ID to edit
+        // Get user ID parameter
         String userIdStr = request.getParameter("id");
         if (userIdStr == null || userIdStr.isEmpty()) {
             response.sendRedirect("AdminDashboardServlet");
@@ -39,31 +49,39 @@ public class UpdateUserServlet extends HttpServlet {
             UserModel userToEdit = UserDAO.getUserById(userId);
 
             if (userToEdit != null) {
-                // Convert image to Base64 if exists
+                // Convert image bytes to Base64 string if image exists
                 if (userToEdit.getImage() != null && userToEdit.getImage().length > 0) {
                     String base64Image = Base64.getEncoder().encodeToString(userToEdit.getImage());
                     request.setAttribute("base64Image", base64Image);
                 }
 
+                // Set user attribute and forward to edit page
                 request.setAttribute("userToEdit", userToEdit);
                 request.getRequestDispatcher("/WEB-INF/views/edit-user.jsp").forward(request, response);
             } else {
+                // User not found
                 response.sendRedirect("AdminDashboardServlet?error=User+not+found");
             }
         } catch (NumberFormatException e) {
+            // Invalid user ID format
             response.sendRedirect("AdminDashboardServlet?error=Invalid+user+ID");
         }
     }
 
+    /**
+     * Processes the form submission to update user details.
+     * Validates admin access, updates user info in database.
+     * Redirects to dashboard with success or error message.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Check if admin is authenticated
+        // Check admin authentication and authorization
         if (!AuthService.isAuthenticated(request) || !AuthService.isAdmin(request)) {
             response.sendRedirect("LoginServlet");
             return;
         }
 
-        // Parse the multipart request
+        // Get uploaded image part (not currently used for update)
         Part filePart = request.getPart("image");
 
         // Get form parameters
@@ -77,13 +95,15 @@ public class UpdateUserServlet extends HttpServlet {
             UserModel userToUpdate = UserDAO.getUserById(userId);
 
             if (userToUpdate != null) {
-                // Update user details
+                // Update user fields
                 userToUpdate.setName(name);
                 userToUpdate.setEmail(email);
                 userToUpdate.setRole(UserModel.Role.valueOf(role));
 
-                // Update user in database
+                // Currently no password change
                 boolean changingPassword = false;
+
+                // Update user profile in database
                 boolean success = UserDAO.updateProfile(userToUpdate, changingPassword);
 
                 if (success) {

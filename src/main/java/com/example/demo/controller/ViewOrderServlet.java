@@ -14,6 +14,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Handles showing order details to the user or admin.
+ *
+ * Checks if user is logged in.
+ * Validates order ID and checks if the user has permission to view the order.
+ * Loads order and its items.
+ * Redirects to order list if anything is wrong.
+ */
 @WebServlet(name = "ViewOrderServlet", value = "/view-order")
 public class ViewOrderServlet extends HttpServlet {
     private OrdersDAO ordersDao;
@@ -25,18 +33,21 @@ public class ViewOrderServlet extends HttpServlet {
         orderItemsDao = new OrderItemsDAO();
     }
 
+    /**
+     * Loads and shows order details if the user is allowed to see it.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Authentication Check - using request context path to avoid loops
+        // Redirect to login if not logged in
         if (!AuthService.isLoggedIn(request)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         try {
-            // 2. Get Order ID from request with validation
+            // Get order ID from request, check if valid
             String orderIdParam = request.getParameter("id");
             if (orderIdParam == null || !orderIdParam.matches("\\d+")) {
                 redirectToOrderList(request, response);
@@ -45,40 +56,43 @@ public class ViewOrderServlet extends HttpServlet {
 
             int orderId = Integer.parseInt(orderIdParam);
 
-            // 3. Retrieve Order
+            // Find the order by ID
             OrderModel order = ordersDao.getOrderById(orderId);
 
-            // 4. Authorization Check
+            // If order doesn't exist, redirect with error
             if (order == null) {
                 redirectToOrderList(request, response, "Order not found");
                 return;
             }
 
+            // Check if user is allowed to see this order
             if (!hasAccessToOrder(request, order)) {
                 redirectToOrderList(request, response, "Access denied");
                 return;
             }
 
-            // 5. Get Order Items
+            // Load items for the order
             List<OrderItemModel> items = orderItemsDao.getItemsByOrder(orderId);
 
-            // 6. Set Attributes and Forward
+            // Pass data to JSP and show order details
             request.setAttribute("order", order);
             request.setAttribute("items", items);
             request.setAttribute("isAdmin", AuthService.isAdmin(request));
-
             request.getRequestDispatcher("/WEB-INF/views/orders/view.jsp")
                     .forward(request, response);
 
         } catch (Exception e) {
+            // If error, redirect to order list with message
             redirectToOrderList(request, response, "Error loading order details");
         }
     }
 
+    // Check if current user is admin or owner of the order
     private boolean hasAccessToOrder(HttpServletRequest request, OrderModel order) {
         return AuthService.isAdmin(request) || order.getUserId() == AuthService.getUserId(request);
     }
 
+    // Redirects to the order list page with optional error message
     private void redirectToOrderList(HttpServletRequest request,
                                      HttpServletResponse response,
                                      String errorMessage) throws IOException {
@@ -88,12 +102,12 @@ public class ViewOrderServlet extends HttpServlet {
 
         String redirectPath = AuthService.isAdmin(request)
                 ? request.getContextPath() + "/admin-orders"
-                : request.getContextPath() + "/customer-orders"; // Point to servlet
+                : request.getContextPath() + "/customer-orders";
 
         response.sendRedirect(redirectPath);
     }
 
-    // Overloaded method without error message
+    // Redirect without error message
     private void redirectToOrderList(HttpServletRequest request,
                                      HttpServletResponse response) throws IOException {
         redirectToOrderList(request, response, null);

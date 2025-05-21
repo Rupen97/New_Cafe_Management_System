@@ -8,9 +8,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+// This class handles all database operations for orders
 public class OrdersDAO {
 
-    // SQL QUERIES
+    // SQL queries we'll use
     private static final String INSERT_ORDER = "INSERT INTO orders (user_id, status, total_amount, order_date, quantity) VALUES (?, ?, ?, ?, ?)";
     private static final String SELECT_ORDER_BY_ID = "SELECT o.*, u.name as customer_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?";
     private static final String SELECT_ALL_ORDERS = "SELECT o.*, u.name as customer_name FROM orders o JOIN users u ON o.user_id = u.id";
@@ -19,11 +20,12 @@ public class OrdersDAO {
     private static final String SELECT_ORDERS_BY_USER = "SELECT o.*, u.name as customer_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.user_id = ?";
     private static final String SELECT_ORDERS_BY_STATUS = "SELECT o.*, u.name as customer_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.status = ?";
 
-    // Method to create a new order
+    // Create a new order in the database
     public static int createOrder(OrderModel order) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(INSERT_ORDER, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
+            // Set values for the SQL query from the order object
             ps.setInt(1, order.getUserId());
             ps.setString(2, order.getStatus().name());
             ps.setDouble(3, order.getTotalAmount());
@@ -32,6 +34,7 @@ public class OrdersDAO {
 
             int rows = ps.executeUpdate();
 
+            // If successful, return the new order's ID
             if (rows > 0) {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
@@ -42,10 +45,10 @@ public class OrdersDAO {
             System.err.println("Error creating order: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        return -1;
+        return -1; // Return -1 if failed
     }
 
-    // Method to get order by ID
+    // Get a single order by its ID
     public static OrderModel getOrderById(int id) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_ORDER_BY_ID)) {
@@ -53,6 +56,7 @@ public class OrdersDAO {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
 
+            // If found, convert database result to OrderModel object
             if (rs.next()) {
                 return mapResultSetToOrder(rs);
             }
@@ -60,16 +64,17 @@ public class OrdersDAO {
             System.err.println("Error retrieving order by ID: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        return null;
+        return null; // Return null if not found
     }
 
-    // Method to get all orders
+    // Get all orders from the database
     public static List<OrderModel> getAllOrders() {
         List<OrderModel> orders = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_ALL_ORDERS);
              ResultSet rs = ps.executeQuery()) {
 
+            // Convert each database row to OrderModel and add to list
             while (rs.next()) {
                 orders.add(mapResultSetToOrder(rs));
             }
@@ -80,18 +85,20 @@ public class OrdersDAO {
         return orders;
     }
 
-    // Method to update order
+    // Update an existing order
     public static boolean updateOrder(OrderModel order) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(UPDATE_ORDER)) {
 
+            // Set values for the SQL query from the order object
             ps.setInt(1, order.getUserId());
             ps.setString(2, order.getStatus().name());
-            ps.setInt(3, order.getQuantity()); // FIXED: added quantity
+            ps.setInt(3, order.getQuantity());
             ps.setDouble(4, order.getTotalAmount());
             ps.setTimestamp(5, order.getOrderDate());
             ps.setInt(6, order.getId());
 
+            // Return true if update was successful
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -100,12 +107,13 @@ public class OrdersDAO {
         }
     }
 
-    // Method to delete order
+    // Delete an order by its ID
     public static boolean deleteOrder(int orderId) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(DELETE_ORDER)) {
 
             ps.setInt(1, orderId);
+            // Return true if deletion was successful
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -114,7 +122,7 @@ public class OrdersDAO {
         }
     }
 
-    // Method to get orders by user ID
+    // Get all orders for a specific user
     public static List<OrderModel> getOrdersByUser(int userId) {
         List<OrderModel> orders = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
@@ -123,6 +131,7 @@ public class OrdersDAO {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
 
+            // Convert each database row to OrderModel and add to list
             while (rs.next()) {
                 orders.add(mapResultSetToOrder(rs));
             }
@@ -133,7 +142,7 @@ public class OrdersDAO {
         return orders;
     }
 
-    // Method to get orders by status
+    // Get all orders with a specific status
     public static List<OrderModel> getOrdersByStatus(Status status) {
         List<OrderModel> orders = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
@@ -142,6 +151,7 @@ public class OrdersDAO {
             ps.setString(1, status.name());
             ResultSet rs = ps.executeQuery();
 
+            // Convert each database row to OrderModel and add to list
             while (rs.next()) {
                 orders.add(mapResultSetToOrder(rs));
             }
@@ -152,18 +162,20 @@ public class OrdersDAO {
         return orders;
     }
 
-    // Update the mapResultSetToOrder method to include customer name
+    // Helper method to convert database result to OrderModel object
     private static OrderModel mapResultSetToOrder(ResultSet rs) throws SQLException {
         OrderModel order = new OrderModel();
+        // Set all fields from the database result
         order.setId(rs.getInt("id"));
         order.setUserId(rs.getInt("user_id"));
         order.setOrderDate(rs.getTimestamp("order_date"));
-        order.setCustomerName(rs.getString("customer_name")); // Add this line
+        order.setCustomerName(rs.getString("customer_name"));
 
+        // Convert status string to enum value
         try {
             order.setStatus(Status.valueOf(rs.getString("status")));
         } catch (IllegalArgumentException e) {
-            order.setStatus(Status.PENDING);
+            order.setStatus(Status.PENDING); // Default to PENDING if status is invalid
         }
 
         order.setTotalAmount(rs.getDouble("total_amount"));
@@ -171,7 +183,7 @@ public class OrdersDAO {
         return order;
     }
 
-
+    // Update just the status of an order
     public static boolean updateOrderStatus(int orderId, Status status) {
         String sql = "UPDATE orders SET status = ? WHERE id = ?";
 
@@ -181,12 +193,13 @@ public class OrdersDAO {
             // Convert enum to string value
             String statusValue = status.name();
 
-            // Debug output (remove in production)
+            // For debugging (can be removed later)
             System.out.println("Updating order " + orderId + " to status: " + statusValue);
 
             ps.setString(1, statusValue);
             ps.setInt(2, orderId);
 
+            // Return true if update was successful
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected == 0) {
                 System.err.println("No rows affected - order ID " + orderId + " may not exist");
@@ -194,7 +207,7 @@ public class OrdersDAO {
             return rowsAffected > 0;
 
         } catch (SQLException e) {
-            // More detailed error logging
+            // Detailed error information
             System.err.println("SQL Error updating status for order " + orderId + ":");
             System.err.println("SQL State: " + e.getSQLState());
             System.err.println("Error Code: " + e.getErrorCode());

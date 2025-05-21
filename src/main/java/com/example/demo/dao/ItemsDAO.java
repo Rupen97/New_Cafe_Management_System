@@ -9,12 +9,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class handles all database operations related to items.
+ * It includes methods to create, read, update, delete, and search items.
+ */
 public class ItemsDAO {
 
-    // SQL QUERIES
+    // SQL queries used in the methods
     private static final String INSERT_ITEM = "INSERT INTO items (name, description, price, quantity, category, status, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-
     private static final String SELECT_ITEM_BY_ID = "SELECT * FROM items WHERE id = ?";
     private static final String SELECT_ALL_ITEMS = "SELECT * FROM items";
     private static final String UPDATE_ITEM_WITH_IMAGE = "UPDATE items SET name=?, description=?, price=?, quantity=?, category=?, status=?, image=? WHERE id=?";
@@ -24,7 +26,11 @@ public class ItemsDAO {
     private static final String SELECT_ITEMS_BY_STATUS = "SELECT * FROM items WHERE status = ?";
     private static final String SELECT_ITEMS_BY_NAME = "SELECT * FROM items WHERE name LIKE ?";
 
-    // Method to register a new item
+    /**
+     * Adds a new item to the database.
+     * @param item the item to create
+     * @return the generated ID of the item, or -1 if failed
+     */
     public static int createItem(itemsModel item) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(INSERT_ITEM, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -52,7 +58,11 @@ public class ItemsDAO {
         return -1;
     }
 
-    // Method to get item by ID
+    /**
+     * Finds an item by its ID.
+     * @param id the item ID
+     * @return the item object or null if not found
+     */
     public static itemsModel getItemById(int id) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_ITEM_BY_ID)) {
@@ -70,7 +80,10 @@ public class ItemsDAO {
         return null;
     }
 
-    // Method to get all items
+    /**
+     * Retrieves all items from the database.
+     * @return a list of all items
+     */
     public static List<itemsModel> getAllItems() {
         List<itemsModel> items = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
@@ -87,7 +100,12 @@ public class ItemsDAO {
         return items;
     }
 
-    // Method to update item
+    /**
+     * Updates an existing item. Can optionally update the image.
+     * @param item the item object with new data
+     * @param updateImage whether to update the image or not
+     * @return true if the update was successful
+     */
     public static boolean updateItem(itemsModel item, boolean updateImage) {
         String sql = updateImage ? UPDATE_ITEM_WITH_IMAGE : UPDATE_ITEM_WITHOUT_IMAGE;
 
@@ -116,7 +134,11 @@ public class ItemsDAO {
         }
     }
 
-    // Method to delete item
+    /**
+     * Deletes an item by its ID.
+     * @param itemId the ID of the item to delete
+     * @return true if deleted successfully
+     */
     public static boolean deleteItem(int itemId) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(DELETE_ITEM)) {
@@ -130,7 +152,11 @@ public class ItemsDAO {
         }
     }
 
-    // Method to get items by category
+    /**
+     * Gets a list of items filtered by category.
+     * @param category the category to filter by
+     * @return list of items in that category
+     */
     public static List<itemsModel> getItemsByCategory(Category category) {
         List<itemsModel> items = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
@@ -149,7 +175,11 @@ public class ItemsDAO {
         return items;
     }
 
-    // Method to get items by status
+    /**
+     * Gets a list of items filtered by status (e.g., AVAILABLE).
+     * @param status the item status to filter by
+     * @return list of items with that status
+     */
     public static List<itemsModel> getItemsByStatus(Status status) {
         List<itemsModel> items = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
@@ -168,7 +198,11 @@ public class ItemsDAO {
         return items;
     }
 
-    // Method to search items by name
+    /**
+     * Searches items whose name matches (or contains) the given text.
+     * @param name the text to search
+     * @return list of matching items
+     */
     public static List<itemsModel> searchItemsByName(String name) {
         List<itemsModel> items = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
@@ -187,6 +221,9 @@ public class ItemsDAO {
         return items;
     }
 
+    /**
+     * Helper method to convert a ResultSet row to an itemsModel object.
+     */
     private static itemsModel mapResultSetToItem(ResultSet rs) throws SQLException {
         itemsModel item = new itemsModel();
         item.setId(rs.getInt("id"));
@@ -195,17 +232,18 @@ public class ItemsDAO {
         item.setPrice(rs.getDouble("price"));
         item.setQuantity(rs.getInt("quantity"));
 
-        // Handle enum conversions
+        // Handle category safely
         try {
             item.setCategory(Category.valueOf(rs.getString("category")));
         } catch (IllegalArgumentException e) {
-            item.setCategory(Category.OTHER); // Default value if category is invalid
+            item.setCategory(Category.OTHER); // Default if not valid
         }
 
+        // Handle status safely
         try {
             item.setStatus(Status.valueOf(rs.getString("status")));
         } catch (IllegalArgumentException e) {
-            item.setStatus(Status.AVAILABLE); // Default value if status is invalid
+            item.setStatus(Status.AVAILABLE); // Default if not valid
         }
 
         item.setImage(rs.getBytes("image"));

@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin - Order Management</title>
+  <title>Order Management - Brew and Beans</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin-dashboard.css">
   <style>
     .order-table {
@@ -52,11 +52,11 @@
       font-size: 14px;
       cursor: pointer;
     }
-    .btn-view {
-      background-color: #6c757d;
-      color: white;
-      border: 1px solid #6c757d;
-    }
+    /*.btn-view {*/
+    /*  background-color: #6c757d;*/
+    /*  color: white;*/
+    /*  border: 1px solid #6c757d;*/
+    /*}*/
     .btn-delete {
       background-color: #dc3545;
       color: white;
@@ -79,19 +79,41 @@
       background-color: #d4edda;
       color: #155724;
     }
-    .alert-danger {
+    .alert-error {
       background-color: #f8d7da;
       color: #721c24;
     }
   </style>
 </head>
 <body>
-<div class="admin-container">
-  <jsp:include page="/WEB-INF/views/partials/sidebar.jsp" />
+<c:if test="${not empty success}">
+  <div class="alert alert-success">
+    <p>${success}</p>
+  </div>
+</c:if>
+<c:if test="${not empty error}">
+  <div class="alert alert-error">
+    <p>${error}</p>
+  </div>
+</c:if>
 
-  <main class="main-content">
-    <header class="page-header">
-      <h1>Order Management</h1>
+<header>
+  <h1>Order Management</h1>
+  <p>Brew and Beans - Cafe Management System</p>
+</header>
+
+<div class="container clearfix">
+  <div class="sidebar">
+    <h2>Admin Menu</h2>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/AdminDashboardServlet">Dashboard</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/ListItemsServlet">Manage Items</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/EditAdminProfileServlet">Profile Settings</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/view-order" class="active">Manage Orders</a></div>
+  </div>
+
+  <div class="main-content">
+    <div class="card">
       <div class="header-actions">
         <form class="status-filter" method="get">
           <label for="status">Filter by Status:</label>
@@ -105,16 +127,7 @@
           </select>
         </form>
       </div>
-    </header>
 
-    <c:if test="${not empty success}">
-      <div class="alert alert-success">${success}</div>
-    </c:if>
-    <c:if test="${not empty error}">
-      <div class="alert alert-danger">${error}</div>
-    </c:if>
-
-    <div class="card">
       <table class="order-table">
         <thead>
         <tr>
@@ -152,10 +165,10 @@
                 </td>
                 <td>
                   <div class="action-group">
-                    <a href="${pageContext.request.contextPath}/order-details?id=${order.id}"
-                       class="btn btn-view">
-                      View
-                    </a>
+<%--                    <a href="${pageContext.request.contextPath}/order-details?id=${order.id}"--%>
+<%--                       class="btn btn-view">--%>
+<%--                      View--%>
+<%--                    </a>--%>
                     <form method="post" style="display:inline;">
                       <input type="hidden" name="orderId" value="${order.id}">
                       <select name="status" onchange="this.form.submit()"
@@ -188,7 +201,11 @@
         </tbody>
       </table>
     </div>
-  </main>
+  </div>
 </div>
+
+<footer>
+  <p>&copy; 2025 Brew and Beans - Cafe Management System</p>
+</footer>
 </body>
 </html>

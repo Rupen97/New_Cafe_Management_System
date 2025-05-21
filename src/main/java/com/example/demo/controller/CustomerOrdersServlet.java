@@ -18,22 +18,28 @@ public class CustomerOrdersServlet extends HttpServlet {
 
     @Override
     public void init() {
+        // Initialize the OrdersDAO object
         ordersDao = new OrdersDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Check if a user is logged in and has the correct role
         if (!AuthService.isUser(request)) {
             response.sendRedirect("LoginServlet");
             return;
         }
 
+        // Get the user ID from the session/auth context
         int userId = AuthService.getUserId(request);
+
+        // Fetch all orders placed by the current user
         List<OrderModel> orders = ordersDao.getOrdersByUser(userId);
+
+        // Pass the order list to the JSP view
         request.setAttribute("orders", orders);
         request.getRequestDispatcher("/WEB-INF/views/customer-orders.jsp").forward(request, response);
     }
-
-
 }

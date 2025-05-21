@@ -1,129 +1,113 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.example.demo.models.UserModel" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.example.demo.models.itemsModel" %>
 <%
     UserModel user = (UserModel) request.getAttribute("user");
     String base64Image = (String) request.getAttribute("base64Image");
-    List<itemsModel> recommendedItems = (List<itemsModel>) request.getAttribute("recommendedItems");
-    int orderCount = request.getAttribute("orderCount") != null ? (Integer) request.getAttribute("orderCount") : 0;
 %>
 <html>
 <head>
-    <title>Customer Dashboard - Brew & Beans</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/edit-user.css">
+    <title>Customer Dashboard - Brew and Beans</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin-dashboard.css">
     <style>
-        :root {
-            --primary-color: #4f46e5;
-            --primary-light: #6366f1;
-            --secondary-color: #6b7280;
-            --light-gray: #f9fafb;
-            --border-color: #e5e7eb;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        /* Overall Layout */
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
         }
 
-        /* Layout Improvements */
-        .container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-
-        /* Sidebar Enhancements */
+        /* Sidebar - Exactly matching first example */
         .sidebar {
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            padding: 1.5rem;
-            position: sticky;
-            top: 1rem;
-            height: fit-content;
+            width: 220px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
 
         .sidebar h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .sidebar h2:before {
-            content: "";
-            display: block;
-            width: 5px;
-            height: 1.25rem;
-            background: var(--primary-color);
-            border-radius: 3px;
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
         }
 
         .menu-item {
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            transition: all 0.3s;
         }
 
         .menu-item:hover {
-            transform: translateX(3px);
+            background-color: #e9ecef;
         }
 
         .menu-item a {
-            color: var(--secondary-color);
             text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0;
+            color: #333;
+            display: block;
+            font-size: 0.95em;
         }
 
-        .menu-item a i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .menu-item a:hover {
-            color: var(--primary-color);
-        }
-
-        /* Main Content Styling */
+        /* Main Content Area */
         .main-content {
+            margin-left: 240px;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 2rem;
         }
 
-        /* Welcome Card */
-        .welcome-card {
+        /*header {*/
+        /*    background-color: #c4d5de;*/
+        /*    color: white;*/
+        /*    padding: 20px 0;*/
+        /*    text-align: center;*/
+        /*    margin-bottom: 30px;*/
+        /*    width: 100%;*/
+        /*}*/
+
+        /*header h1 {*/
+        /*    margin: 0;*/
+        /*    font-size: 2em;*/
+        /*}*/
+
+        /*header p {*/
+        /*    margin: 5px 0 0;*/
+        /*    font-size: 1em;*/
+        /*}*/
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .card {
             background: white;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
         }
 
-        .welcome-card h2 {
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
+        .card h2 {
+            margin-top: 0;
+            color: #333;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
         }
 
-        .user-profile {
+        .admin-profile {
             display: flex;
             align-items: center;
-            gap: 2rem;
-        }
-
-        .profile-image {
-            position: relative;
+            gap: 30px;
         }
 
         .profile-image img {
@@ -131,316 +115,157 @@
             height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #eee;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .profile-status {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 15px;
-            height: 15px;
-            background-color: var(--success-color);
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-
-        .profile-details {
-            flex: 1;
+            border: 3px solid #e0c9a6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .profile-details p {
-            margin: 0.5rem 0;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            margin: 10px 0;
+            font-size: 1em;
         }
 
         .profile-details strong {
-            color: #333;
-            min-width: 80px;
+            color: #555;
             display: inline-block;
+            width: 80px;
         }
 
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            padding: 1.5rem;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-card i {
-            font-size: 1.75rem;
-            color: var(--primary-light);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-card h3 {
-            font-size: 1.75rem;
-            color: var(--primary-color);
-            margin: 0.5rem 0;
-        }
-
-        .stat-card p {
-            color: var(--secondary-color);
-            margin: 0;
-            font-size: 0.9rem;
-        }
-
-        /* Recommended Items */
-        .recommended-section {
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            padding: 2rem;
-        }
-
-        .section-header {
+        .welcome-section {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-header h2 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .item-card {
+            gap: 40px;
+            background-color: #f9f5f0;
+            padding: 30px;
             border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .frame-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .coffee-cup-frame {
+            width: 120px;
+            height: 180px;
+            border-radius: 60px 60px 0 0;
+            border: 4px solid #e0c9a6;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
         }
 
-        .item-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .item-image {
-            height: 150px;
-            overflow: hidden;
-        }
-
-        .item-image img {
+        .coffee-cup-frame img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
         }
 
-        .item-card:hover .item-image img {
-            transform: scale(1.05);
+        .coffee-cup-frame::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -15px;
+            width: 20px;
+            height: 40px;
+            border: 3px solid #e0c9a6;
+            border-left: none;
+            border-radius: 0 20px 20px 0;
+            background: #f9f5f0;
         }
 
-        .item-details {
-            padding: 1rem;
-            background: white;
+        .welcome-message {
+            flex: 1;
         }
 
-        .item-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .welcome-message h2 {
+            color: #5a3921;
+            margin-bottom: 15px;
+            font-size: 1.8em;
         }
 
-        .item-price {
-            color: var(--success-color);
-            font-weight: bold;
-            margin-bottom: 0.5rem;
+        .welcome-message p {
+            color: #6c757d;
+            line-height: 1.6;
+            font-size: 1.05em;
         }
 
-        .item-category {
-            font-size: 0.8rem;
-            color: var(--secondary-color);
-            background: var(--light-gray);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            display: inline-block;
-        }
+        /*footer {*/
+        /*    background-color: #2c3e50;*/
+        /*    color: white;*/
+        /*    text-align: center;*/
+        /*    padding: 15px 0;*/
+        /*    margin-top: 30px;*/
+        /*}*/
 
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--primary-color);
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background: #4338ca;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary-light);
-            color: white;
-        }
-
-        /* Icons (using Unicode as fallback) */
-        .icon-dashboard:before { content: "📊"; }
-        .icon-menu:before { content: "🍽️"; }
-        .icon-orders:before { content: "📋"; }
-        .icon-profile:before { content: "👤"; }
-        .icon-logout:before { content: "🚪"; }
-        .icon-coffee:before { content: "☕"; }
-        .icon-orders-count:before { content: "📦"; }
-        .icon-favorites:before { content: "❤️"; }
-        .icon-points:before { content: "⭐"; }
     </style>
 </head>
 <body>
-<header>
-    <h1>Customer Dashboard</h1>
-    <p>Welcome back to Brew & Beans</p>
-</header>
 
-<div class="container clearfix">
-    <!-- Enhanced Sidebar -->
-    <div class="sidebar">
-        <h2>Customer Menu</h2>
-        <div class="menu-item"><a href="UserDashboardServlet"><i class="icon-dashboard"></i> Dashboard</a></div>
-        <div class="menu-item"><a href="CustomerItemsServlet"><i class="icon-menu"></i> Browse Menu</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/view-order"><i class="icon-orders"></i> My Orders</a></div>
-
-        <div class="menu-item"><a href="EditProfileServlet"><i class="icon-profile"></i> Profile Settings</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/LogoutServlet"><i class="icon-logout"></i> Logout</a></div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <% if (request.getAttribute("successMessage") != null) { %>
-        <div class="alert alert-success"><%= request.getAttribute("successMessage") %></div>
-        <% } %>
-        <% if (request.getAttribute("errorMessage") != null) { %>
-        <div class="alert alert-error"><%= request.getAttribute("errorMessage") %></div>
-        <% } %>
-
-        <!-- Welcome Card with Enhanced Profile -->
-        <div class="welcome-card">
-            <h2>Welcome back, <%= user.getName() %></h2>
-            <div class="user-profile">
-                <div class="profile-image">
-                    <img src="data:image/jpeg;base64,<%= base64Image != null ? base64Image : "" %>"
-                         alt="Profile Picture"
-                         onerror="this.src='${pageContext.request.contextPath}/assets/images/default-profile.svg'">
-                    <div class="profile-status" title="Active"></div>
-                </div>
-                <div class="profile-details">
-                    <p><strong>Email:</strong> <%= user.getEmail() %></p>
-                    <p><strong>Member Since:</strong> January 2023</p>
-                    <p><strong>Loyalty Points:</strong> 1,250</p>
-                    <p><strong>Status:</strong> <span style="color: var(--success-color);">Gold Member</span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="icon-coffee"></i>
-                <h3><%= orderCount %></h3>
-                <p>Total Orders</p>
-            </div>
-            <div class="stat-card">
-                <i class="icon-favorites"></i>
-                <h3>12</h3>
-                <p>Favorite Items</p>
-            </div>
-            <div class="stat-card">
-                <i class="icon-points"></i>
-                <h3>1,250</h3>
-                <p>Loyalty Points</p>
-            </div>
-            <div class="stat-card">
-                <i class="icon-orders-count"></i>
-                <h3>3</h3>
-                <p>Active Orders</p>
-            </div>
-        </div>
-
-        <!-- Recommended Items Section -->
-        <div class="recommended-section">
-            <div class="section-header">
-                <h2>Recommended For You</h2>
-                <a href="CustomerItemsServlet" class="btn btn-outline">View Full Menu</a>
-            </div>
-
-            <div class="items-grid">
-                <% if (recommendedItems != null && !recommendedItems.isEmpty()) { %>
-                <% for (itemsModel item : recommendedItems) { %>
-                <div class="item-card">
-                    <a href="ItemDetailServlet?id=<%= item.getId() %>">
-                        <div class="item-image">
-                            <% if (item.getImage() != null && item.getImage().length > 0) { %>
-                            <img src="data:image/jpeg;base64,<%= java.util.Base64.getEncoder().encodeToString(item.getImage()) %>"
-                                 alt="<%= item.getName() %>">
-                            <% } else { %>
-                            <img src="${pageContext.request.contextPath}/assets/images/default-food.jpg"
-                                 alt="<%= item.getName() %>">
-                            <% } %>
-                        </div>
-                        <div class="item-details">
-                            <h3 class="item-name"><%= item.getName() %></h3>
-                            <p class="item-price">$<%= String.format("%.2f", item.getPrice()) %></p>
-                            <span class="item-category"><%= item.getCategory().name() %></span>
-                        </div>
-                    </a>
-                </div>
-                <% } %>
-                <% } else { %>
-                <p>No recommendations available. Start ordering to get personalized recommendations!</p>
-                <% } %>
-            </div>
-        </div>
-    </div>
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>Customer Menu</h2>
+    <div class="menu-item"><a href="UserDashboardServlet">Dashboard</a></div>
+    <div class="menu-item"><a href="CustomerItemsServlet">Browse Menu</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/view-order">My Orders</a></div>
+    <div class="menu-item"><a href="EditProfileServlet">Profile Settings</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/AboutUsServlet">About Us</a></div>
+    <div class="menu-item"><a href="${pageContext.request.contextPath}/ContactUsServlet">Contact Us</a></div>
 </div>
 
-<footer>
-    <p>&copy; 2025 Bean & Bloom - Cafe Management System</p>
-</footer>
+<!-- Main Content -->
+<div class="main-content">
+    <header >
+        <h1>Welcome back, <%= user.getName() %> ☕</h1>
+        <p>Your personalized coffee space at <strong>Brew & Beans</strong></p>
+    </header>
+
+    <div class="container">
+        <!-- Profile Section -->
+        <div class="card" style="background-color: #fffdf9;">
+            <h2>Your Profile</h2>
+            <div class="admin-profile">
+                <div class="profile-image">
+                    <img src="data:image/jpeg;base64,<%= base64Image %>" alt="Profile Picture">
+                </div>
+                <div class="profile-details">
+                    <p><strong>Name:</strong> <%= user.getName() %></p>
+                    <p><strong>Email:</strong> <%= user.getEmail() %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome Message Section -->
+        <div class="card welcome-section" style="background-color: #fffaf4;">
+<%--            <div class="frame-group">--%>
+<%--                <div class="coffee-cup-frame">--%>
+<%--                    <img src="${pageContext.request.contextPath}/assets/images/coffee-cup.jpg" alt="Coffee Cup">--%>
+<%--                </div>--%>
+<%--            </div>--%>
+            <div class="welcome-message">
+                <h2>Hey <%= user.getName().split(" ")[0] %>, fancy a coffee break?</h2>
+                <p>We’re thrilled to have you back! Explore our menu, track your orders, or enjoy the aromas of your favorite brews right here on your dashboard.</p>
+                <p style="margin-top: 15px; font-style: italic; color: #7c5c42;">“Coffee is a language in itself.” – Jackie Chan</p>
+            </div>
+        </div>
+
+        <!-- Explore Menu CTA -->
+        <div class="card" style="text-align: center; background-color: #f9f5f0;">
+            <h2>Ready for your next sip?</h2>
+            <p>Browse our handpicked drinks and seasonal specials crafted just for you.</p>
+            <a href="CustomerItemsServlet" style="display: inline-block; margin-top: 15px; padding: 10px 25px; background-color: #a9744f; color: white; text-decoration: none; border-radius: 25px; font-weight: bold; transition: background-color 0.3s;">
+                Browse Menu
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Brew and Beans - Crafted with ❤️ for coffee lovers</p>
+    </footer>
+</div>
+
+
 </body>
 </html>

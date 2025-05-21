@@ -7,18 +7,26 @@ import com.example.demo.models.OrderItemModel;
 import com.example.demo.models.itemsModel;
 import com.example.demo.models.OrderModel;
 import com.example.demo.services.AuthService;
-import com.example.demo.utils.DBConnectionUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
+/**
+ * AddOrderServlet
+ *
+ * Handles adding orders by customers.
+ * Supports:
+ * - GET with action=view to show order form for available items.
+ * - GET with action=add to process adding an order with quantity.
+ *
+ * Only accessible by authenticated users.
+ */
 @WebServlet(name = "AddOrderServlet", value = "/AddOrderServlet")
 public class addOrderServlet extends HttpServlet {
+
     private OrdersDAO ordersDao;
     private ItemsDAO itemsDao;
     private OrderItemsDAO orderItemsDao;
@@ -33,6 +41,8 @@ public class addOrderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Check if user is authenticated
         if (!AuthService.isUser(request)) {
             response.sendRedirect("LoginServlet");
             return;
@@ -41,24 +51,33 @@ public class addOrderServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("view".equalsIgnoreCase(action)) {
-            int itemId = Integer.parseInt(request.getParameter("itemId"));
-            itemsModel item = itemsDao.getItemById(itemId);
+            // Show the order form for a selected available item
+            try {
+                int itemId = Integer.parseInt(request.getParameter("itemId"));
+                itemsModel item = itemsDao.getItemById(itemId);
 
-            if (item != null && "AVAILABLE".equals(item.getStatus().toString())) {
-                request.setAttribute("item", item);
-                request.getRequestDispatcher("/WEB-INF/views/add-order.jsp").forward(request, response);
-            } else {
-                request.getSession().setAttribute("error", "Item is not available.");
+                if (item != null && "AVAILABLE".equals(item.getStatus().toString())) {
+                    request.setAttribute("item", item);
+                    request.getRequestDispatcher("/WEB-INF/views/add-order.jsp").forward(request, response);
+                } else {
+                    request.getSession().setAttribute("error", "Item is not available.");
+                    response.sendRedirect("CustomerItemsServlet");
+                }
+            } catch (NumberFormatException e) {
+                request.getSession().setAttribute("error", "Invalid item ID.");
                 response.sendRedirect("CustomerItemsServlet");
             }
+
         } else if ("add".equalsIgnoreCase(action)) {
+            // Process adding an order and order item
             try {
                 int itemId = Integer.parseInt(request.getParameter("itemId"));
                 int quantity = Integer.parseInt(request.getParameter("quantity"));
                 itemsModel item = itemsDao.getItemById(itemId);
 
                 if (item != null && "AVAILABLE".equals(item.getStatus().toString())) {
-                    // Create the order
+
+                    // Create new order object and set fields
                     OrderModel order = new OrderModel();
                     order.setUserId(AuthService.getUserId(request));
                     order.setStatus(OrderModel.Status.PENDING);
@@ -66,11 +85,11 @@ public class addOrderServlet extends HttpServlet {
                     order.setTotalAmount(item.getPrice() * quantity);
                     order.setOrderDate(new Timestamp(System.currentTimeMillis()));
 
-                    // Save the order and get the generated ID
+                    // Insert order in DB and get generated order ID
                     int orderId = ordersDao.createOrder(order);
 
                     if (orderId > 0) {
-                        // Create the order item
+                        // Create order item object
                         OrderItemModel orderItem = new OrderItemModel();
                         orderItem.setOrderId(orderId);
                         orderItem.setItemId(itemId);
@@ -78,13 +97,13 @@ public class addOrderServlet extends HttpServlet {
                         orderItem.setPrice(item.getPrice());
                         orderItem.setQuantity(quantity);
 
-                        // Save the order item
+                        // Insert order item in DB
                         boolean itemSaved = orderItemsDao.createOrderItem(orderItem);
 
                         if (itemSaved) {
                             request.getSession().setAttribute("success", "Order placed successfully!");
                         } else {
-                            // Rollback the order if item couldn't be saved
+                            // Rollback order if order item save failed
                             ordersDao.deleteOrder(orderId);
                             request.getSession().setAttribute("error", "Failed to save order items.");
                         }
@@ -97,6 +116,7 @@ public class addOrderServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 request.getSession().setAttribute("error", "Invalid item ID or quantity.");
             }
+
             response.sendRedirect("CustomerItemsServlet");
         }
     }

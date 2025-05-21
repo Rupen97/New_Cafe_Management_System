@@ -1,4 +1,5 @@
 package com.example.demo.controller;
+
 import com.example.demo.models.UserModel;
 import com.example.demo.services.AuthService;
 import jakarta.servlet.*;
@@ -8,82 +9,56 @@ import java.io.IOException;
 import java.util.Base64;
 
 /**
- * UserDashboardServlet
+ * This servlet shows the user dashboard page.
  *
- * This servlet handles the user dashboard functionality. It's responsible for
- * displaying the user dashboard and processing user-specific actions.
- *
- * Session management implementation:
- * 1. Checks if the user is authenticated using AuthService
- * 2. If authenticated, displays the dashboard with user information
- * 3. If not authenticated, redirects to the login page
+ * If the user is logged in and is a regular user, it shows their info.
+ * If the user is an admin, it sends them to the admin dashboard.
+ * If the user is not logged in, it sends them to the login page.
  */
 @WebServlet(name = "UserDashboardServlet", value = "/UserDashboardServlet")
 public class UserDashboardServlet extends HttpServlet {
+
     /**
-     * Handles GET requests to the UserDashboardServlet
-     *
-     * This method checks if the user is authenticated and displays the dashboard
-     * if they are. If not, it redirects to the login page.
-     *
-     * @param request The HTTP request object
-     * @param response The HTTP response object
-     * @throws ServletException If a servlet-specific error occurs
-     * @throws IOException If an I/O error occurs
+     * Handles loading the user dashboard page.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Check if the user is authenticated
         if (AuthService.isAuthenticated(request)) {
-            // Get the user from the session
             UserModel user = AuthService.getCurrentUser(request);
 
-            // Check if this is a regular user (not admin)
+            // If admin, go to admin dashboard instead
             if (user.getRole() != UserModel.Role.user) {
-                // If admin, redirect to admin dashboard
                 response.sendRedirect("AdminDashboardServlet");
                 return;
             }
 
-            // User is authenticated and has the correct role
+            // Set user info for the page
             request.setAttribute("user", user);
 
-            // Convert image bytes to Base64 for display in JSP
+            // Convert profile image to Base64 if it exists
             if (user.getImage() != null && user.getImage().length > 0) {
                 String base64Image = Base64.getEncoder().encodeToString(user.getImage());
                 request.setAttribute("base64Image", base64Image);
             }
 
-            // Forward to dashboard
+            // Show the user dashboard page
             request.getRequestDispatcher("/WEB-INF/views/user-dashboard.jsp").forward(request, response);
         } else {
-            // If not authenticated, redirect to login
+            // If not logged in, go to login page
             response.sendRedirect("LoginServlet");
         }
     }
 
     /**
-     * Handles POST requests to the UserDashboardServlet
-     *
-     * This method verifies that the user is authenticated, then processes
-     * any user-specific form submissions or actions.
-     *
-     * @param request The HTTP request object
-     * @param response The HTTP response object
-     * @throws ServletException If a servlet-specific error occurs
-     * @throws IOException If an I/O error occurs
+     * Handles form submissions on the dashboard.
+     * Currently, it just reloads the dashboard page.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Check if the user is authenticated
         if (!AuthService.isAuthenticated(request)) {
-            // If not authenticated, redirect to login
             response.sendRedirect("LoginServlet");
             return;
         }
-
-        // Process any user-specific form submissions here
-        // For now, just display the dashboard
         doGet(request, response);
     }
 }

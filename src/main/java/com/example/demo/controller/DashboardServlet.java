@@ -10,29 +10,29 @@ import java.io.IOException;
 
 @WebServlet(name = "DashboardServlet", value = "/DashboardServlet")
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024,
-        maxFileSize = 1024 * 1024 * 5,
-        maxRequestSize = 1024 * 1024 * 10
+        fileSizeThreshold = 1024 * 1024,       // 1MB threshold for in-memory vs disk
+        maxFileSize = 1024 * 1024 * 5,         // Max 5MB per file
+        maxRequestSize = 1024 * 1024 * 10      // Max 10MB total for the request
 )
-
 public class DashboardServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Check authentication
+        // Retrieve current session and user object
         HttpSession session = request.getSession();
         UserModel user = (UserModel) session.getAttribute("user");
 
+        // Redirect to login if user is not authenticated
         if (user == null) {
             response.sendRedirect("LoginServlet");
             return;
         }
 
-        // Set user data for the JSP
+        // Set user data to be used in JSP
         request.setAttribute("user", user);
 
-        // Forward to dashboard JSP
+        // Forward the request to list-items.jsp view (user dashboard)
         request.getRequestDispatcher("/WEB-INF/views/list-items.jsp").forward(request, response);
     }
 }

@@ -10,48 +10,49 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+// This class handles all database operations for users
 public class UserDAO {
 
-    // SQL QUERIES
+    // Different SQL queries for different update scenarios
     public static final String UPDATE_USER_WITH_PASSWORD = "UPDATE users SET name=?, email=?, role=?, profile_picture=?, password=? WHERE id=?";
-
     public static final String UPDATE_USER_WITHOUT_PASSWORD = "UPDATE users SET name=?, email=?, role=?, profile_picture=? WHERE id=?";
     public static final String UPDATE_USER_WITHOUT_IMAGE = "UPDATE users SET name=?, email=?, role=? WHERE id=?";
     public static final String UPDATE_USER_WITH_PASSWORD_NO_IMAGE = "UPDATE users SET name=?, email=?, role=?, password=? WHERE id=?";
 
-    //Updateing the users
+    // Basic user update query
     public static final String UPDATE_USER = "UPDATE users SET name=?, email=?, role=?, profile_picture=? WHERE id=?";
 
-    //Deleting Servlet
+    // Query to delete a user
     public static final String DELETE_USER = "DELETE FROM users WHERE id=?";
 
-    //selecting all from users
+    // Query to get all users
     public static final String SELECT_ALL_USERS = "SELECT * FROM users";
 
-    //Inserting new user to database
+    // Query to add a new user
     public static final String INSERT_USER = "INSERT INTO users(name, email, password, role, profile_picture) VALUES (?,?,?,?, ?)";
 
-    //sql query to find user by email and password
+    // Query to find user by email (for login)
     public static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email = ?";
 
-    //selecting user by id
+    // Query to find user by ID
     public static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id = ?";
 
-    //method to register a new user
-    public static int registerUser(UserModel user){
+    // Register a new user in the database
+    public static int registerUser(UserModel user) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(INSERT_USER, PreparedStatement.RETURN_GENERATED_KEYS);) {
-            // Set parameters for the prepared statement
+
+            // Set all user data for the insert query
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail());
-            ps.setString(3, user.getPassword()); // In production, this should be hashed
+            ps.setString(3, user.getPassword()); // Note: Password should be hashed in production
             ps.setString(4, user.getRole().name());
             ps.setBytes(5, user.getImage());
 
-            // Execute the insert statement
+            // Execute the insert
             int rows = ps.executeUpdate();
 
-            // If insertion was successful, get the generated user ID
+            // If successful, return the new user's ID
             if (rows > 0) {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
@@ -59,33 +60,28 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            // Log the exception details for debugging
             System.err.println("Error registering user: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        return -1;
+        return -1; // Return -1 if failed
     }
 
-
-    //method to login
+    // Old login method (marked as deprecated - not recommended for use)
     @Deprecated
     public static UserModel loginUser(UserModel user) {
-        // This method is kept for backward compatibility
-        // Authentication is now handled by retrieving the user by email and then verifying the password
+        // This method is outdated - now we get user by email and verify password separately
         return getUserByEmail(user.getEmail());
     }
 
-    //method to get user by email
+    // Get a user by their email address
     public static UserModel getUserByEmail(String email) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_USER_BY_EMAIL);) {
-            // Set the email parameter
-            ps.setString(1, email);
 
-            // Execute the query
+            ps.setString(1, email); // Set the email to search for
             ResultSet rs = ps.executeQuery();
 
-            // If the user is found, create and return a UserModel object
+            // If found, create and return UserModel object
             if (rs.next()) {
                 UserModel userFromDB = new UserModel();
                 userFromDB.setId(rs.getInt("id"));
@@ -97,25 +93,21 @@ public class UserDAO {
                 return userFromDB;
             }
         } catch (SQLException e) {
-            // Log the exception details for debugging
             System.err.println("Error retrieving user by email: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        return null; // Return null if user not found
+        return null; // Return null if not found
     }
 
-
-    //method to Getting user by id
+    // Get a user by their ID
     public static UserModel getUserById(int id) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_USER_BY_ID);) {
-            // Set the user ID parameter
-            ps.setInt(1, id);
 
-            // Execute the query
+            ps.setInt(1, id); // Set the ID to search for
             ResultSet rs = ps.executeQuery();
 
-            // If the user is found, create and return a UserModel object
+            // If found, create and return UserModel object
             if (rs.next()) {
                 UserModel userFromDB = new UserModel();
                 userFromDB.setId(rs.getInt("id"));
@@ -127,20 +119,20 @@ public class UserDAO {
                 return userFromDB;
             }
         } catch (SQLException e) {
-            // Log the exception details for debugging
             System.err.println("Error retrieving user by ID: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        return null; // Return null if user not found
+        return null; // Return null if not found
     }
 
-    //method to select all users
+    // Get all users from the database
     public static List<UserModel> getAllUsers() {
         List<UserModel> users = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_ALL_USERS);
              ResultSet rs = ps.executeQuery()) {
 
+            // For each user in the database, create UserModel and add to list
             while (rs.next()) {
                 UserModel user = new UserModel();
                 user.setId(rs.getInt("id"));
@@ -158,17 +150,19 @@ public class UserDAO {
         return users;
     }
 
-    // Method to update user
+    // Update basic user information
     public static boolean updateUser(UserModel user, boolean changingPassword) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(UPDATE_USER)) {
 
+            // Set all user data for the update query
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getRole().name());
             ps.setBytes(4, user.getImage());
             ps.setInt(5, user.getId());
 
+            // Return true if update was successful
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -177,12 +171,13 @@ public class UserDAO {
         }
     }
 
-    // Method to delete user
+    // Delete a user from the database
     public static boolean deleteUser(int userId) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(DELETE_USER)) {
 
-            ps.setInt(1, userId);
+            ps.setInt(1, userId); // Set the ID of user to delete
+            // Return true if deletion was successful
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -191,11 +186,12 @@ public class UserDAO {
         }
     }
 
-    //method to edit profile
+    // Update user profile with different options
     public static boolean updateProfile(UserModel user, boolean updatePassword) {
         try (Connection connection = DBConnectionUtil.getConnection()) {
             String sql;
 
+            // Choose the right SQL query based on what's being updated
             if (user.getImage() != null && user.getImage().length > 0) {
                 sql = updatePassword ? UPDATE_USER_WITH_PASSWORD : UPDATE_USER_WITHOUT_PASSWORD;
             } else {
@@ -203,20 +199,25 @@ public class UserDAO {
             }
 
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                // Set common parameters
                 ps.setString(1, user.getName());
                 ps.setString(2, user.getEmail());
                 ps.setString(3, user.getRole().name());
 
                 int paramIndex = 4;
+                // Add image data if present
                 if (user.getImage() != null && user.getImage().length > 0) {
                     ps.setBytes(paramIndex++, user.getImage());
                 }
+                // Add password if being updated
                 if (updatePassword) {
                     ps.setString(paramIndex++, user.getPassword());
                 }
 
+                // Set user ID
                 ps.setInt(paramIndex, user.getId());
 
+                // Return true if update was successful
                 int rowsAffected = ps.executeUpdate();
                 return rowsAffected > 0;
             }
@@ -225,6 +226,4 @@ public class UserDAO {
             throw new RuntimeException(e);
         }
     }
-
-    //filter
 }

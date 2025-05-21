@@ -26,6 +26,33 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
+        .item-image-container {
+            width: 80px;  /* Fixed width */
+            height: 80px; /* Fixed height - same as width for square */
+            border: 3px solid #e0c9a6;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Ensures nothing spills outside the frame */
+            padding: 0; /* Remove any padding */
+        }
+
+        .item-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Fill the container, may crop if needed */
+            display: block;
+            margin: 0; /* Remove any margin */
+        }
+
+        /* Style for "No image" text */
+        .text-muted {
+            color: #999;
+            font-size: 12px;
+        }
         .filter-form select, .filter-form input {
             width: 100%;
             padding: 8px;
@@ -71,11 +98,11 @@
 <div class="container clearfix">
     <div class="sidebar">
         <h2>Admin Menu</h2>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}//AdminDashboardServlet">Dashboard</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/AdminDashboardServlet">Dashboard</a></div>
         <div class="menu-item"><a href="${pageContext.request.contextPath}/ListItemsServlet">Manage Items</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/ListUsersServlet">Manage Users</a></div>
-        <div class="menu-item"><a href="${pageContext.request.contextPath}/admin/profile.jsp">Profile Settings</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/EditAdminProfileServlet">Profile Settings</a></div>
         <div class="menu-item"><a href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></div>
+        <div class="menu-item"><a href="${pageContext.request.contextPath}/view-order">manage order</a></div>
     </div>
 
     <div class="main-content">
@@ -137,12 +164,14 @@
                     <tr>
                         <td>${item.id}</td>
                         <td>
-                            <c:if test="${not empty item.image}">
-                                <img src="data:image/jpeg;base64,${item.image}" class="item-image" alt="${item.name}">
-                            </c:if>
-                            <c:if test="${empty item.image}">
-                                <span class="text-muted">No image</span>
-                            </c:if>
+                            <div class="item-image-container">
+                                <c:if test="${not empty item.image}">
+                                    <img src="data:image/jpeg;base64,${item.image}" class="item-image" alt="${item.name}">
+                                </c:if>
+                                <c:if test="${empty item.image}">
+                                    <span class="text-muted">No image</span>
+                                </c:if>
+                            </div>
                         </td>
                         <td>${item.name}</td>
                         <td>${item.description}</td>

@@ -1,56 +1,56 @@
-package com.example.demo.filters;
-
-import jakarta.servlet.*;
-import jakarta.servlet.annotation.*;
-import jakarta.servlet.http.*;
-import java.io.IOException;
-
-/**
- * AdminAuthorizationFilter
- *
- * This class should be implemented as a filter to check if a user has admin role
- * before allowing access to admin resources. When implemented, it will intercept
- * requests to admin URLs and redirect unauthorized users to the login page.
- *
- * Implementation Guidelines:
- * 1. Uncomment the @WebFilter annotation with appropriate URL patterns to protect
- * 2. Implement the doFilter method to check for admin authorization
- *
- * In the doFilter method, you should:
- * 1. Cast the request and response to HttpServletRequest and HttpServletResponse
- * 2. Get the current session (without creating a new one if none exists)
- * 3. Check if the user is authenticated and has the admin role
- * 4. If the user is an admin, allow the request to proceed
- * 5. Otherwise, redirect to the login page
- *
- * Example URL patterns to protect:
- * - "/AdminDashboardServlet"
- * - "/WEB-INF/views/admin-dashboard.jsp"
- * - Any other admin-specific resources
- *
- * To check if a user has admin role, you would:
- * 1. Get the user object from the session
- * 2. Check if the user's role is UserModel.Role.admin
- */
-// @WebFilter(urlPatterns = {"/AdminDashboardServlet", "/WEB-INF/views/admin-dashboard.jsp"})
-public class AdminAuthorizationFilter implements Filter {
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // Initialization code
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        // TODO: Implement admin authorization logic here
-
-        // For now, just pass the request along the filter chain
-        chain.doFilter(request, response);
-    }
-
-    @Override
-    public void destroy() {
-        // Cleanup code
-    }
-}
+//package com.example.demo.filters;
+//
+//import com.example.demo.models.UserModel;
+//import jakarta.servlet.*;
+//import jakarta.servlet.annotation.WebFilter;
+//import jakarta.servlet.http.*;
+//
+//import java.io.IOException;
+//
+///**
+// * AdminAuthorizationFilter
+// *
+// * Protects admin-only resources by checking if the logged-in user has admin role.
+// * Redirects unauthorized or unauthenticated users to the login page.
+// */
+//@WebFilter(urlPatterns = {
+//        "/AdminDashboardServlet",
+//        "/WEB-INF/views/admin-dashboard.jsp"
+//})
+//public class AdminAuthorizationFilter implements Filter {
+//
+//    @Override
+//    public void init(FilterConfig filterConfig) throws ServletException {
+//        // Optional initialization code, if needed
+//    }
+//
+//    @Override
+//    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+//            throws IOException, ServletException {
+//
+//        HttpServletRequest request = (HttpServletRequest) req;
+//        HttpServletResponse response = (HttpServletResponse) res;
+//
+//        // Get existing session, do not create a new one
+//        HttpSession session = request.getSession(false);
+//
+//        if (session != null) {
+//            UserModel user = (UserModel) session.getAttribute("currentUser");
+//
+//            // Check if user exists and has admin role
+//            if (user != null && user.getRole() == UserModel.Role.admin) {
+//                // User is admin - allow request to proceed
+//                chain.doFilter(req, res);
+//                return;
+//            }
+//        }
+//
+//        // User not logged in or not admin - redirect to login page
+//        response.sendRedirect("LoginServlet");
+//    }
+//
+//    @Override
+//    public void destroy() {
+//        // Optional cleanup code, if needed
+//    }
+//}

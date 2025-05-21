@@ -7,6 +7,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO class for managing order items in the database.
+ */
 public class OrderItemsDAO {
 
     // SQL Queries
@@ -17,7 +20,12 @@ public class OrderItemsDAO {
     private static final String DELETE_ITEM = "DELETE FROM order_items WHERE id = ?";
     private static final String DELETE_BY_ORDER = "DELETE FROM order_items WHERE order_id = ?";
 
-    // Create a new order item
+    /**
+     * Inserts a new order item into the database.
+     *
+     * @param item the order item to insert
+     * @return true if insert was successful, false otherwise
+     */
     public static boolean createOrderItem(OrderItemModel item) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(INSERT_ITEM)) {
@@ -35,7 +43,12 @@ public class OrderItemsDAO {
         }
     }
 
-    // Get all items for an order
+    /**
+     * Retrieves all order items associated with a given order ID.
+     *
+     * @param orderId the ID of the order
+     * @return a list of order items
+     */
     public static List<OrderItemModel> getItemsByOrder(int orderId) {
         List<OrderItemModel> items = new ArrayList<>();
         try (Connection connection = DBConnectionUtil.getConnection();
@@ -54,7 +67,12 @@ public class OrderItemsDAO {
         return items;
     }
 
-    // Get single order item by ID
+    /**
+     * Retrieves a single order item by its ID.
+     *
+     * @param id the ID of the order item
+     * @return the corresponding OrderItemModel, or null if not found
+     */
     public static OrderItemModel getOrderItemById(int id) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_BY_ID)) {
@@ -72,7 +90,12 @@ public class OrderItemsDAO {
         return null;
     }
 
-    // Update order item quantity
+    /**
+     * Updates the quantity of an existing order item.
+     *
+     * @param item the order item with updated quantity
+     * @return true if update was successful, false otherwise
+     */
     public static boolean updateOrderItem(OrderItemModel item) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(UPDATE_ITEM)) {
@@ -87,7 +110,12 @@ public class OrderItemsDAO {
         }
     }
 
-    // Delete an order item
+    /**
+     * Deletes a single order item by its ID.
+     *
+     * @param id the ID of the order item to delete
+     * @return true if deletion was successful, false otherwise
+     */
     public static boolean deleteOrderItem(int id) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(DELETE_ITEM)) {
@@ -100,7 +128,12 @@ public class OrderItemsDAO {
         }
     }
 
-    // Delete all items for an order
+    /**
+     * Deletes all order items associated with a given order ID.
+     *
+     * @param orderId the ID of the order
+     * @return true if deletion was successful, false otherwise
+     */
     public static boolean deleteItemsByOrder(int orderId) {
         try (Connection connection = DBConnectionUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(DELETE_BY_ORDER)) {
@@ -113,7 +146,13 @@ public class OrderItemsDAO {
         }
     }
 
-    // Helper method to map ResultSet to OrderItemModel
+    /**
+     * Helper method to convert a ResultSet row to an OrderItemModel.
+     *
+     * @param rs the ResultSet from a query
+     * @return an OrderItemModel populated from the ResultSet
+     * @throws SQLException if a database access error occurs
+     */
     private static OrderItemModel mapResultSetToOrderItem(ResultSet rs) throws SQLException {
         OrderItemModel item = new OrderItemModel();
         item.setId(rs.getInt("id"));
